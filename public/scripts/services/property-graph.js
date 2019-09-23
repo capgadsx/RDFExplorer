@@ -300,6 +300,7 @@ function propertyGraphService (req, log, settings) {
   function Node () {
     RDFResource.call(this);
     this.properties = [];
+    this.isNode = true;
     // Representation stuff
     propertyGraph.nodes.push(this);
     this.id = lastNodeId++;
@@ -446,6 +447,7 @@ function propertyGraphService (req, log, settings) {
   function Property (parentNode) {
     RDFResource.call(this);
     this.id         = lastPropId++;
+    this.isNode = false;
     this.parentNode = parentNode;
     this.index      = parentNode.properties.length;
     this.literal    = null;

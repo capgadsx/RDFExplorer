@@ -1,8 +1,8 @@
 angular.module('rdfvis.controllers').controller('EditCtrl', EditCtrl);
 
-EditCtrl.$inject = ['$scope', 'propertyGraphService', '$timeout', '$q'];
+EditCtrl.$inject = ['$scope', 'propertyGraphService', '$timeout', '$q', '$http'];
 
-function EditCtrl ($scope, pGraph, $timeout, $q) {
+function EditCtrl ($scope, pGraph, $timeout, $q, $http) {
   var vm = this;
   vm.selected = null;
   vm.variable = null;
@@ -109,6 +109,72 @@ function EditCtrl ($scope, pGraph, $timeout, $q) {
   }
 
   var lastValueSearch = '';
+
+
+  function toQueryNode(node) {
+    return {
+      "id": node.id,
+      "name": node.variable.id,
+      "uris": node.uris,
+    }
+  }
+
+  function toQueryEdge(edge) {
+    return {
+      "id": edge.source.id,
+      "name": edge.source.variable.id,
+      "uris": edge.source.uris,
+      "sourceId": edge.source.parentNode.id,
+      "targetId": edge.target.id,
+    }
+  }
+
+  function toQuerySelected(selected) {
+    return { "id": selected.id, "isNode": selected.isNode }
+  }
+
+  function printGraph(graph) {
+    return JSON.stringify(
+      {
+        "nodes": graph.nodes.map(toQueryNode),
+        "edges": graph.edges.map(toQueryEdge),
+        "selected": toQuerySelected(graph.selected)
+      })
+  }
+
+  function queryGraph(graph, callback) {
+    var jsonGraph = printGraph(graph)
+    $http({
+      method: 'POST',
+      url: 'http://localhost:59286/api/QueryGraph',
+      dataType: 'application/json',
+      contentType: "application/json",
+      data: jsonGraph,
+      headers: {
+        "Content-Type": "application/json"
+      },
+    }).then(
+      function onSuccess(response) {
+        callback(response.data);
+        // console.log("success:" + JSON.stringify(response.data))
+        // return response;
+      },
+      function onError(response) {
+        console.log('Error: ' + response.data);
+      }
+    );
+  }
+
+  function isEmpty(myObject) {
+    for(var key in myObject) {
+        if (myObject.hasOwnProperty(key)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
   function loadPreview () {
     if (!vm.isVariable) return;
 
@@ -134,12 +200,25 @@ function EditCtrl ($scope, pGraph, $timeout, $q) {
           lastValueSearch = now;
           vm.resultFilterLoading = true;
           config.varFilter = now;
-          vm.selected.loadPreview(config);
+          queryGraph(pGraph, function (data) {
+            if(isEmpty(data))
+              vm.selected.loadPreview(config);
+            else
+              vm.variable.results = data;
+          });
+
+          // vm.selected.loadPreview(config);
         }
       }, 400);
     } else {
       lastValueSearch = '';
-      vm.selected.loadPreview(config);
+      queryGraph(pGraph, function (data) {
+        if(isEmpty(data))
+          vm.selected.loadPreview(config);
+        else
+          vm.variable.results = data;
+      });
+      // vm.selected.loadPreview(config);
     }
   }
 
