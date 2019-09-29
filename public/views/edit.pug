@@ -69,13 +69,6 @@ div(ng-show="main.tool == 'edit'", ng-controller="EditCtrl as ctrl")
             a(ng-if="!ctrl.isLiteral", href="", ng-click="elem.value.describe()") {{ elem.value.getLabel(); }}
             span(ng-if="ctrl.isLiteral") {{ elem.value }}
           i.pull-right.fa.fa-plus.mr-1.mt-1.clickable(ng-click="ctrl.addValue(elem.id ? elem.id : elem.value);")
-      //.row() add pagination here
-        .col-md-2.clickable
-          i.fa.fa-chevron-left
-        .col-md-8
-        .col-md-2.clickable
-          i.fa.fa-chevron-right
-
 
     //-------------------- FILTERS --------------------//
     .custom-container-title.no-select.mt-2.clickable(
