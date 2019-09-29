@@ -2,14 +2,14 @@ angular.module('rdfvis.controllers').controller('EditCtrl', EditCtrl);
 
 EditCtrl.$inject = ['$scope', 'propertyGraphService', '$timeout', '$q', '$http'];
 
-function EditCtrl ($scope, pGraph, $timeout, $q, $http) {
+function EditCtrl($scope, pGraph, $timeout, $q, $http) {
   var vm = this;
   vm.selected = null;
   vm.variable = null;
 
   vm.isVariable = true;
-  vm.isConst    = false;
-  vm.isLiteral  = false;
+  vm.isConst = false;
+  vm.isLiteral = false;
 
   vm.newValueType = '';
   vm.newValuePlaceholder = '';
@@ -19,34 +19,34 @@ function EditCtrl ($scope, pGraph, $timeout, $q, $http) {
   vm.resultFilterLoading = false;
   vm.canceller = null;
 
-  vm.added  = 0;
+  vm.added = 0;
   vm.newFilterType = "";
   vm.newFilterData = {};
   vm.showFilters = true;
 
   vm.mkVariable = mkVariable;
-  vm.mkConst    = mkConst;
-  vm.addValue   = addValue;
-  vm.rmValue    = rmValue;
-  vm.newFilter  = newFilter;
-  vm.rmFilter   = rmFilter;
-  vm.loadPreview  = loadPreview;
+  vm.mkConst = mkConst;
+  vm.addValue = addValue;
+  vm.rmValue = rmValue;
+  vm.newFilter = newFilter;
+  vm.rmFilter = rmFilter;
+  vm.loadPreview = loadPreview;
   vm.addSearchAsFilter = addSearchAsFilter;
 
   pGraph.edit = editResource;
-  vm.refresh  = pGraph.refresh;
-  vm.filters  = pGraph.filters;
+  vm.refresh = pGraph.refresh;
+  vm.filters = pGraph.filters;
 
-  function editResource (resource) {
+  function editResource(resource) {
     if (vm.selected != resource) {
       vm.resultFilterValue = '';
     }
     if (resource) {
-      vm.selected   = resource;
-      vm.variable   = resource.variable;
+      vm.selected = resource;
+      vm.variable = resource.variable;
       vm.isVariable = resource.isVariable();
-      vm.isConst    = !vm.isVariable;
-      vm.isLiteral  = !!(vm.selected.parent); //FIXME: check if this is a literal
+      vm.isConst = !vm.isVariable;
+      vm.isLiteral = !!(vm.selected.parent); //FIXME: check if this is a literal
       if (vm.isLiteral) {
         vm.newValueType = 'text';
         vm.newValuePlaceholder = 'add a new literal';
@@ -59,7 +59,7 @@ function EditCtrl ($scope, pGraph, $timeout, $q, $http) {
     $scope.$emit('tool', 'edit');
   }
 
-  function mkVariable () {
+  function mkVariable() {
     vm.selected.mkVariable();
     vm.isVariable = true;
     vm.isConst = false;
@@ -67,7 +67,7 @@ function EditCtrl ($scope, pGraph, $timeout, $q, $http) {
     vm.refresh();
   }
 
-  function mkConst () {
+  function mkConst() {
     vm.added = 0;
     vm.selected.mkConst();
     vm.isVariable = false;
@@ -75,7 +75,7 @@ function EditCtrl ($scope, pGraph, $timeout, $q, $http) {
     vm.refresh();
   }
 
-  function addValue (newV) {
+  function addValue(newV) {
     if (!newV) {
       newV = vm.newValue;
       vm.newValue = '';
@@ -90,11 +90,11 @@ function EditCtrl ($scope, pGraph, $timeout, $q, $http) {
     }
   }
 
-  function rmValue (value) {
+  function rmValue(value) {
     return vm.selected.removeUri(value)
   }
 
-  function newFilter (targetVar) { //TODO: targetVar not needed now
+  function newFilter(targetVar) { //TODO: targetVar not needed now
     if (vm.newFilterType == "") return false;
     targetVar.addFilter(vm.newFilterType, copyObj(vm.newFilterData));
     loadPreview();
@@ -103,7 +103,7 @@ function EditCtrl ($scope, pGraph, $timeout, $q, $http) {
     vm.newFilterData = {};
   }
 
-  function rmFilter (targetVar, filter) {
+  function rmFilter(targetVar, filter) {
     targetVar.removeFilter(filter);
     loadPreview();
   }
@@ -166,30 +166,31 @@ function EditCtrl ($scope, pGraph, $timeout, $q, $http) {
   }
 
   function isEmpty(myObject) {
-    for(var key in myObject) {
-        if (myObject.hasOwnProperty(key)) {
-            return false;
-        }
+    for (var key in myObject) {
+      if (myObject.hasOwnProperty(key)) {
+        return false;
+      }
     }
 
     return true;
-}
+  }
 
-  function loadPreview () {
+  function loadPreview() {
     if (!vm.isVariable) return;
 
     if (vm.canceller) {
       vm.canceller.resolve('new preview');
       vm.resultFilterLoading = false;
     }
-    
+
     vm.canceller = $q.defer();
     vm.resultFilterLoading = true;
     var config = { //add pagination here
       limit: 10,
-      callback: () => { 
+      callback: () => {
         vm.resultFilterLoading = false;
-        vm.canceller = null; },
+        vm.canceller = null;
+      },
       canceller: vm.canceller.promise,
     };
 
@@ -201,7 +202,7 @@ function EditCtrl ($scope, pGraph, $timeout, $q, $http) {
           vm.resultFilterLoading = true;
           config.varFilter = now;
           queryGraph(pGraph, function (data) {
-            if(isEmpty(data))
+            if (isEmpty(data))
               vm.selected.loadPreview(config);
             else
               vm.variable.results = data;
@@ -213,7 +214,7 @@ function EditCtrl ($scope, pGraph, $timeout, $q, $http) {
     } else {
       lastValueSearch = '';
       queryGraph(pGraph, function (data) {
-        if(isEmpty(data))
+        if (isEmpty(data))
           vm.selected.loadPreview(config);
         else
           vm.variable.results = data;
@@ -222,7 +223,7 @@ function EditCtrl ($scope, pGraph, $timeout, $q, $http) {
     }
   }
 
-  function addSearchAsFilter () { // should work but not used
+  function addSearchAsFilter() { // should work but not used
     var text = vm.resultFilterValue + '';
     console.log(text);
     var p = vm.selected.getPropByUri("http://www.w3.org/2000/01/rdf-schema#label");
@@ -232,11 +233,11 @@ function EditCtrl ($scope, pGraph, $timeout, $q, $http) {
     }
     p.mkConst();
     p.mkLiteral();
-    p.getLiteral.addFilter('regex', {regex: text});
+    p.getLiteral.addFilter('regex', { regex: text });
     loadPreview();
   }
 
-  function copyObj (obj) {
+  function copyObj(obj) {
     return Object.assign({}, obj);
   }
 

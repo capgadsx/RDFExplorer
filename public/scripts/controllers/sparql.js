@@ -2,17 +2,17 @@ angular.module('rdfvis.controllers').controller('SparqlCtrl', SparqlCtrl);
 
 SparqlCtrl.$inject = ['$scope', 'propertyGraphService'];
 
-function SparqlCtrl ($scope, pGraph) {
+function SparqlCtrl($scope, pGraph) {
   var vm = this;
   vm.queries = [];
-  vm.empty   = [];
+  vm.empty = [];
 
   vm.onClick = onClick;
   vm.updateQuery = updateQueries;
 
   pGraph.getQueries = updateQueries;
 
-  function updateQueries () {
+  function updateQueries() {
     var all = new Set();
     pGraph.nodes.forEach(r => {
       if (r.isVariable()) all.add(r);
@@ -41,7 +41,7 @@ function SparqlCtrl ($scope, pGraph) {
     }
   }
 
-  function onClick (res) {
+  function onClick(res) {
     res.onClick();
     pGraph.refresh();
   }

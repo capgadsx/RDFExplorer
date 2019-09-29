@@ -1,9 +1,9 @@
 angular.module('rdfvis.controllers').controller('MainCtrl', MainCtrl);
 
 MainCtrl.$inject = ['$scope', 'propertyGraphService', 'queryService', 'requestService', '$timeout', '$http',
-'logService', '$uibModal', '$animate'];
+  'logService', '$uibModal', '$animate'];
 
-function MainCtrl ($scope, pGraph, query, request, $timeout, $http, log, $uibModal, $animate) {
+function MainCtrl($scope, pGraph, query, request, $timeout, $http, log, $uibModal, $animate) {
   var vm = this;
   /* General stuff */
   vm.tool = 'none';
@@ -20,7 +20,7 @@ function MainCtrl ($scope, pGraph, query, request, $timeout, $http, log, $uibMod
   vm.searchResults = [];
   vm.searchActive = false;
   vm.searchWait = false;
-  vm.noResults  = false;
+  vm.noResults = false;
   vm.lastSearch = '';
   vm.tdata = {}; //interactive tutorial data.
 
@@ -36,14 +36,14 @@ function MainCtrl ($scope, pGraph, query, request, $timeout, $http, log, $uibMod
   $scope.drag = drag;
   $scope.dragExample = dragExample;
   $scope.dragSearch = dragSearch;
-  $scope.$on('newSettings', function(event, data) { vm.lastSearch = ''; });
-  $scope.$on('tool', function(event, data) {
-    vm.tool = data; 
-    document.getElementById('right-panel').scrollTop=0;
+  $scope.$on('newSettings', function (event, data) { vm.lastSearch = ''; });
+  $scope.$on('tool', function (event, data) {
+    vm.tool = data;
+    document.getElementById('right-panel').scrollTop = 0;
   });
 
   /* Tools display function */
-  function toolToggle (panel) {
+  function toolToggle(panel) {
     vm.tool = (vm.tool == panel) ? 'none' : panel;
     if (vm.tool == 'describe' && pGraph.getSelected()) pGraph.getSelected().describe();
     if (vm.tool == 'edit' && pGraph.getSelected()) pGraph.getSelected().edit();
@@ -54,8 +54,8 @@ function MainCtrl ($scope, pGraph, query, request, $timeout, $http, log, $uibMod
   function searchActivate() { vm.searchActive = true; }
   function searchDeactivate() { vm.searchActive = false; }
 
-  function onSearch (data) {
-    log.add('Search "'+ vm.lastSearch + '", ' + data.length + ' results');
+  function onSearch(data) {
+    log.add('Search "' + vm.lastSearch + '", ' + data.length + ' results');
     /*var r = {}
     data.results.bindings.forEach(res => {
       if (!r[res.uri.value]) r[res.uri.value] = [];
@@ -74,7 +74,7 @@ function MainCtrl ($scope, pGraph, query, request, $timeout, $http, log, $uibMod
     //console.log(data);
     vm.searchResults = [];
     data.forEach(r => {
-      vm.searchResults.push({uri: r.concepturi, label: r.label, desc: r.description});
+      vm.searchResults.push({ uri: r.concepturi, label: r.label, desc: r.description });
       if (r.label) request.setLabel(r.concepturi, r.label);
     });
 
@@ -84,20 +84,20 @@ function MainCtrl ($scope, pGraph, query, request, $timeout, $http, log, $uibMod
     if (vm.searchResults.length == 0) vm.noResults = true;
   }
 
-  function onSearchErr (resp) {
+  function onSearchErr(resp) {
     vm.searchWait = false;
     vm.noResults = false;
     vm.searchError = true;
     vm.lastSearch = '';
   }
 
-  function search () {
+  function search() {
     //TODO: fix when null;
     if (vm.searchInput != vm.lastSearch) {
       var input = vm.searchInput;
       vm.lastSearch = input;
       vm.searchWait = true;
-      vm.noResults  = false; 
+      vm.noResults = false;
       //$http.get('https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&language=en&limit=20&uselang=en&type=item&continue=0&search='+input).then(
       $http({
         method: 'GET',
@@ -114,41 +114,41 @@ function MainCtrl ($scope, pGraph, query, request, $timeout, $http, log, $uibMod
           origin: '*',
         }
       }).then(
-        function onSuccess (response) {
+        function onSuccess(response) {
           onSearch(response.data.search);
         },
-        function onError (response) { onSearchErr(); console.log('Error: ' + response.data); }
+        function onError(response) { onSearchErr(); console.log('Error: ' + response.data); }
       );
       //request.execQuery(query.search(input), onSearch, onSearchErr);
     }
     vm.searchActive = true;
   }
 
-  function searchChange () {
+  function searchChange() {
     var now = vm.searchInput + '';
     $timeout(function () {
       if (now && now == vm.searchInput) search();
     }, 400);
   }
 
-  function drag (ev, uri, prop, special) {
+  function drag(ev, uri, prop, special) {
     if (!special) special = '';
     ev.dataTransfer.setData("uri", uri);
     ev.dataTransfer.setData("prop", prop);
     ev.dataTransfer.setData("special", special);
   }
 
-  function dragExample (ev, type) {
+  function dragExample(ev, type) {
     ev.dataTransfer.setData("special", "example");
     ev.dataTransfer.setData("type", type);
   }
 
-  function dragSearch (ev) {
+  function dragSearch(ev) {
     ev.dataTransfer.setData("special", "search");
     ev.dataTransfer.setData("alias", vm.lastSearch);
   }
 
-  function tutorial () {
+  function tutorial() {
     vm.tool = 'none';
     log.add('Tutorial started')
     vm.searchActive = false;
@@ -156,60 +156,88 @@ function MainCtrl ($scope, pGraph, query, request, $timeout, $http, log, $uibMod
     var intro = introJs();
     intro.setOptions({
       steps: [
-        { intro: 'Hello! This tutorial will guide you in the usage of this interface.'},
-        { element: '#step1',
+        { intro: 'Hello! This tutorial will guide you in the usage of this interface.' },
+        {
+          element: '#step1',
           intro: 'You can start searching <b style="color: #1f77b4;">resources</b> here',
-          position: 'bottom-right-aligned'},
-        { element: '#search-container', 
-          intro: 'As example, let us search <i>Einstein</i>...',
-          position: 'top-right-aligned'},
-        { element: '#search-results-panel',
-          intro: 'The search results are displayed here, each of these elements can be dragged...',
-          position: 'bottom-right-aligned'},
-        { element: '#vqb-main',
-          intro: '... and dropped here, this space is the <i>query creator</i>.',
-          position: 'right-aligned'},
-        { element: '#vqb-main',
-          intro: 'Clicking in a <b style="color: #1f77b4;">resource</b> here will open the ' +
-                 'explorer tool (<i class="fa fa-list"></i>)',
-          position: 'right-aligned'},
-        { element: '#right-panel',
-          intro: 'Here you can explore the properties of this <b style="color: #1f77b4;">resource</b>, '+
-                 'bordered elements can be dragged and droped into the <i>query creator</i>.',
-          position: 'right-aligned'},
-        { element: '#right-panel',
-          intro: 'As an example let us drag some of these properties...',
-          position: 'right-aligned'},
-        { element: '#vqb-main',
-          intro: '... into the <i>query creator</i>. When you drop a <b style="color: #ff7f0e;">property</b> ' +
-                 'a <b style="color: #2ca02c;">variable</b> will be created that will collect the desired ' +
-                 'information. <b style="color: #2ca02c;">Variables</b> always begin with a <b>?</b>.',
-          position: 'right-aligned'},
-        { element: '#vqb-main',
-          intro: 'Clicking a <b style="color: #2ca02c;">variable</b> will open the edit tool (<i class="fa fa-pencil"></i>).',
-          position: 'right-aligned'},
-        { element: '#right-panel',
-          intro: 'Here you can change if this element is a <b style="color: #2ca02c;">variable</b> or a ' +
-                 'constraint (<b style="color: #1f77b4;">resource</b>). ' + 
-                 '<b style="color: #2ca02c;">Variables</b> will display posible solutions so you can check what are you collecting.',
-          position: 'left-aligned'},
-        { element: '#right-panel',
-          intro: 'Next to each possible result there is a <i class="fa fa-plus"></i> symbol, clicking it ' + 
-                 'will add that value as a constraint but will not set the <b style="color: #1f77b4;">resource</b> as one. ' +
-                 'To set this <b style="color: #1f77b4;">resource</b> as constraint (or as ' +
-                 '<b style="color: #2ca02c;">variable</b>) you should click on the tabs above.',
-          position: 'left-aligned'},
-        { element: '#right-buttons',
-          intro: 'More tools are displayed here. You can switch tools at any time. ' +
-                 'Lets us check the <i>query</i> tool (<i class="fa fa-code"></i>)',
-          position: 'left-aligned'},
-        { element: '#right-panel',
-          intro: 'Here you can see the SPARQL equivalent of the query you\'ve drawn in the <i>query creator</i>. ' +
-                 'Executing this query will give you all required results.',
-          position: 'left-aligned'},
-        { intro: 'For more options right-click on any element of the <i>query creator</i>.'
+          position: 'bottom-right-aligned'
         },
-        { element: '#help-button',
+        {
+          element: '#search-container',
+          intro: 'As example, let us search <i>Einstein</i>...',
+          position: 'top-right-aligned'
+        },
+        {
+          element: '#search-results-panel',
+          intro: 'The search results are displayed here, each of these elements can be dragged...',
+          position: 'bottom-right-aligned'
+        },
+        {
+          element: '#vqb-main',
+          intro: '... and dropped here, this space is the <i>query creator</i>.',
+          position: 'right-aligned'
+        },
+        {
+          element: '#vqb-main',
+          intro: 'Clicking in a <b style="color: #1f77b4;">resource</b> here will open the ' +
+            'explorer tool (<i class="fa fa-list"></i>)',
+          position: 'right-aligned'
+        },
+        {
+          element: '#right-panel',
+          intro: 'Here you can explore the properties of this <b style="color: #1f77b4;">resource</b>, ' +
+            'bordered elements can be dragged and droped into the <i>query creator</i>.',
+          position: 'right-aligned'
+        },
+        {
+          element: '#right-panel',
+          intro: 'As an example let us drag some of these properties...',
+          position: 'right-aligned'
+        },
+        {
+          element: '#vqb-main',
+          intro: '... into the <i>query creator</i>. When you drop a <b style="color: #ff7f0e;">property</b> ' +
+            'a <b style="color: #2ca02c;">variable</b> will be created that will collect the desired ' +
+            'information. <b style="color: #2ca02c;">Variables</b> always begin with a <b>?</b>.',
+          position: 'right-aligned'
+        },
+        {
+          element: '#vqb-main',
+          intro: 'Clicking a <b style="color: #2ca02c;">variable</b> will open the edit tool (<i class="fa fa-pencil"></i>).',
+          position: 'right-aligned'
+        },
+        {
+          element: '#right-panel',
+          intro: 'Here you can change if this element is a <b style="color: #2ca02c;">variable</b> or a ' +
+            'constraint (<b style="color: #1f77b4;">resource</b>). ' +
+            '<b style="color: #2ca02c;">Variables</b> will display posible solutions so you can check what are you collecting.',
+          position: 'left-aligned'
+        },
+        {
+          element: '#right-panel',
+          intro: 'Next to each possible result there is a <i class="fa fa-plus"></i> symbol, clicking it ' +
+            'will add that value as a constraint but will not set the <b style="color: #1f77b4;">resource</b> as one. ' +
+            'To set this <b style="color: #1f77b4;">resource</b> as constraint (or as ' +
+            '<b style="color: #2ca02c;">variable</b>) you should click on the tabs above.',
+          position: 'left-aligned'
+        },
+        {
+          element: '#right-buttons',
+          intro: 'More tools are displayed here. You can switch tools at any time. ' +
+            'Lets us check the <i>query</i> tool (<i class="fa fa-code"></i>)',
+          position: 'left-aligned'
+        },
+        {
+          element: '#right-panel',
+          intro: 'Here you can see the SPARQL equivalent of the query you\'ve drawn in the <i>query creator</i>. ' +
+            'Executing this query will give you all required results.',
+          position: 'left-aligned'
+        },
+        {
+          intro: 'For more options right-click on any element of the <i>query creator</i>.'
+        },
+        {
+          element: '#help-button',
           intro: 'If you need more help or want to see some examples click here.'
         },
       ]
@@ -218,19 +246,19 @@ function MainCtrl ($scope, pGraph, query, request, $timeout, $http, log, $uibMod
     intro.start().onbeforechange(function () {
       switch (intro._currentStep) {
         case 2:
-          $timeout(s=>{vm.searchInput  = 'E'}, 200);
-          $timeout(s=>{vm.searchInput += 'i'}, 300);
-          $timeout(s=>{vm.searchInput += 'n'}, 400);
-          $timeout(s=>{vm.searchInput += 's'}, 600);
-          $timeout(s=>{vm.searchInput += 't'}, 800);
-          $timeout(s=>{vm.searchInput += 'e'}, 900);
-          $timeout(s=>{vm.searchInput += 'i'}, 1000);
-          $timeout(s=>{vm.searchInput += 'n'; search();}, 1100);
+          $timeout(s => { vm.searchInput = 'E' }, 200);
+          $timeout(s => { vm.searchInput += 'i' }, 300);
+          $timeout(s => { vm.searchInput += 'n' }, 400);
+          $timeout(s => { vm.searchInput += 's' }, 600);
+          $timeout(s => { vm.searchInput += 't' }, 800);
+          $timeout(s => { vm.searchInput += 'e' }, 900);
+          $timeout(s => { vm.searchInput += 'i' }, 1000);
+          $timeout(s => { vm.searchInput += 'n'; search(); }, 1100);
           break;
 
         case 4:
           vm.searchActive = true;
-          var base = angular.element( document.querySelector( '#result0' ) );
+          var base = angular.element(document.querySelector('#result0'));
           var pos = base.offset();
           vm.tdata.elem = base.clone().attr('id', 'example-move');
           vm.tdata.elem.css('left', pos.left);
@@ -246,7 +274,7 @@ function MainCtrl ($scope, pGraph, query, request, $timeout, $http, log, $uibMod
               vm.tdata.resource.addUri(uri);
               vm.tdata.resource.mkConst();
             }
-            vm.tdata.resource.setPosition(pos.left+300+110, pos.top+15);
+            vm.tdata.resource.setPosition(pos.left + 300 + 110, pos.top + 15);
             pGraph.refresh();
           }, 1500);
           break;
@@ -260,12 +288,12 @@ function MainCtrl ($scope, pGraph, query, request, $timeout, $http, log, $uibMod
           break;
 
         case 7:
-          document.getElementById('objptitle').scrollIntoView({behavior: 'smooth'});
+          document.getElementById('objptitle').scrollIntoView({ behavior: 'smooth' });
           break;
 
         case 8:
-          document.getElementById('objptitle').scrollIntoView({behavior: 'smooth'});
-          var base = angular.element( document.querySelector( '#propId0' ) );
+          document.getElementById('objptitle').scrollIntoView({ behavior: 'smooth' });
+          var base = angular.element(document.querySelector('#propId0'));
           var pos = base.offset();
           vm.tdata.elem2 = base.clone().attr('id', 'example-move')
           vm.tdata.elem2.addClass('propRect');
@@ -307,12 +335,12 @@ function MainCtrl ($scope, pGraph, query, request, $timeout, $http, log, $uibMod
     });
   }
 
-  function modalHelp () {
+  function modalHelp() {
     $uibModal.open({
       animation: true,
       windowClass: 'show',
       templateUrl: '/modal/help',
       size: 'lg',
-    }).result.then(function(){}, function(res){});
+    }).result.then(function () { }, function (res) { });
   }
 }

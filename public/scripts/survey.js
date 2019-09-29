@@ -15,26 +15,26 @@ angular.module('survey').controller('MainCtrl', MainCtrl);
 
 MainCtrl.$inject = ['$http'];
 
-function MainCtrl ($http) {
+function MainCtrl($http) {
   var vm = this;
 
   vm.data = {
     startUrl: "https://explorer.csrg.cl",
-    user: {gender: 'male', age: null, degree: null},
+    user: { gender: 'male', age: null, degree: null },
     tasks: [
-      {on: null, sparql: null, time: null}, {on: null, sparql: null, time: null},
-      {on: null, sparql: null, time: null}, {on: null, sparql: null, time: null},
-      {on: null, sparql: null, time: null}, {on: null, sparql: null, time: null},
-      {on: null, sparql: null, time: null}, {on: null, sparql: null, time: null},
-      {on: null, sparql: null, time: null}, {on: null, sparql: null, time: null},
+      { on: null, sparql: null, time: null }, { on: null, sparql: null, time: null },
+      { on: null, sparql: null, time: null }, { on: null, sparql: null, time: null },
+      { on: null, sparql: null, time: null }, { on: null, sparql: null, time: null },
+      { on: null, sparql: null, time: null }, { on: null, sparql: null, time: null },
+      { on: null, sparql: null, time: null }, { on: null, sparql: null, time: null },
     ],
     tlx: [
-      {on: null, score: [50, 50, 50, 50, 50, 50]},
-      {on: null, score: [50, 50, 50, 50, 50, 50]},
+      { on: null, score: [50, 50, 50, 50, 50, 50] },
+      { on: null, score: [50, 50, 50, 50, 50, 50] },
     ],
     likert: [
-      {on: null, score: [3,3,3]},
-      {on: null, score: [3,3,3]},
+      { on: null, score: [3, 3, 3] },
+      { on: null, score: [3, 3, 3] },
     ]
   }
 
@@ -46,20 +46,20 @@ function MainCtrl ($http) {
     "https://explorer.csrg.cl",
     "https://query.wikidata.org"
   ];
-  
+
   vm.tlx = [
-    {category: "Mental Demand", text: "How mentally demanding was the task?", lmin:"Very Low", lmax:"Very High", },
-    {category: "Physical Demand", text: "How physically demanding was the task?", lmin:"Very Low", lmax:"Very High", },
-    {category: "Temporal Demand", text: "How hurried or rushed was the pace of the task?", lmin:"Very Low", lmax:"Very High", },
-    {category: "Performance", text: "How successful were you in accomplishing what you were asked to do?", lmin:"Perfect", lmax:"Failure", },
-    {category: "Effort", text: "How hard did you have to work to accomplish your level of performance?", lmin:"Very Low", lmax:"Very High", },
-    {category: "Frustration", text: "How insecure, discouraged, irritated, stessed, and annoyed were you?", lmin:"Very Low", lmax:"Very High", },
+    { category: "Mental Demand", text: "How mentally demanding was the task?", lmin: "Very Low", lmax: "Very High", },
+    { category: "Physical Demand", text: "How physically demanding was the task?", lmin: "Very Low", lmax: "Very High", },
+    { category: "Temporal Demand", text: "How hurried or rushed was the pace of the task?", lmin: "Very Low", lmax: "Very High", },
+    { category: "Performance", text: "How successful were you in accomplishing what you were asked to do?", lmin: "Perfect", lmax: "Failure", },
+    { category: "Effort", text: "How hard did you have to work to accomplish your level of performance?", lmin: "Very Low", lmax: "Very High", },
+    { category: "Frustration", text: "How insecure, discouraged, irritated, stessed, and annoyed were you?", lmin: "Very Low", lmax: "Very High", },
   ]
 
   vm.likert = [
-    { text: "How confident are you of the answers you gave", lmin:"Not at all Confident", lmax:"Highly Confident", },
-    { text: "How satisfied you are with the tool", lmin:"Very Disatisfied", lmax:"Very Satisfied", },
-    { text: "How likely are you to recommend the tool to a friend or colleague?", lmin:"Not Likely", lmax:"Very Likely", },
+    { text: "How confident are you of the answers you gave", lmin: "Not at all Confident", lmax: "Highly Confident", },
+    { text: "How satisfied you are with the tool", lmin: "Very Disatisfied", lmax: "Very Satisfied", },
+    { text: "How likely are you to recommend the tool to a friend or colleague?", lmin: "Not Likely", lmax: "Very Likely", },
   ]
 
   vm.tasks = [
@@ -83,14 +83,14 @@ function MainCtrl ($http) {
   vm.download = download;
   vm.upload = upload;
 
-  function subtitle () {
+  function subtitle() {
     if (vm.step == 1) return 'Part 1: User identification';
-    if (vm.step == 2) return 'Part 2: Task ' + (vm.taskStep+1) + ' of 10';
+    if (vm.step == 2) return 'Part 2: Task ' + (vm.taskStep + 1) + ' of 10';
     if (vm.step == 3) return 'Part 3: Nasa-TLX for ' + vm.url[vm.urlStep].slice(8);;
     if (vm.step == 4) return 'Part 4: Likert for ' + vm.url[vm.urlStep].slice(8);
   }
 
-  function next () {
+  function next() {
     switch (vm.step) {
       case 0:
         if (vm.data.startUrl == "https://explorer.csrg.cl") {
@@ -101,12 +101,12 @@ function MainCtrl ($http) {
         vm.step += 1;
         break;
       case 1:
-        document.getElementById('top').scrollIntoView({behavior: 'smooth'});
+        document.getElementById('top').scrollIntoView({ behavior: 'smooth' });
         vm.step += 1;
         vm.clock = Date.now();
         break;
       case 2:
-        document.getElementById('top').scrollIntoView({behavior: 'smooth'});
+        document.getElementById('top').scrollIntoView({ behavior: 'smooth' });
         vm.data.tasks[vm.taskStep].on = vm.url[vm.urlStep];
         vm.data.tasks[vm.taskStep].time = (Date.now() - vm.clock) / 1000;
         vm.clock = Date.now();
@@ -118,7 +118,7 @@ function MainCtrl ($http) {
         }
         break;
       case 3:
-        document.getElementById('top').scrollIntoView({behavior: 'smooth'});
+        document.getElementById('top').scrollIntoView({ behavior: 'smooth' });
         if (vm.urlStep == 0) {
           vm.data.tlx[vm.urlStep].on = vm.url[vm.urlStep];
           vm.urlStep = 1;
@@ -129,7 +129,7 @@ function MainCtrl ($http) {
         }
         break;
       case 4:
-        document.getElementById('top').scrollIntoView({behavior: 'smooth'});
+        document.getElementById('top').scrollIntoView({ behavior: 'smooth' });
         if (vm.urlStep == 0) {
           vm.data.likert[vm.urlStep].on = vm.url[vm.urlStep];
           vm.urlStep = 1;
@@ -143,17 +143,17 @@ function MainCtrl ($http) {
     }
   }
 
-  function download () {
+  function download() {
     var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(vm.data));
     var downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href",     dataStr);
+    downloadAnchorNode.setAttribute("href", dataStr);
     downloadAnchorNode.setAttribute("download", "answers.json");
     document.body.appendChild(downloadAnchorNode); // required for firefox
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
   }
-  
-  function upload () {
+
+  function upload() {
     return $http({
       method: 'POST',
       url: '/upload-survey',

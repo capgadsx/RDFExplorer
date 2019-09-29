@@ -1,12 +1,12 @@
 angular.module('rdfvis.services').factory('propertyGraphService', propertyGraphService);
 propertyGraphService.$inject = ['requestService', 'logService', 'settingsService'];
 
-function propertyGraphService (req, log, settings) {
+function propertyGraphService(req, log, settings) {
   var nodeWidth = 220,
-      childWidth = 200,
-      nodeBaseHeight = 30,
-      childHeight = 20,
-      padding = 10;
+    childWidth = 200,
+    nodeBaseHeight = 30,
+    childHeight = 20,
+    padding = 10;
 
   var propertyGraph = { //TODO this to the end;
     // DATA:
@@ -14,18 +14,18 @@ function propertyGraphService (req, log, settings) {
     nodes: [],
     edges: [],
     filters: {
-      text: {name: 'contains', inputs: 1, data: {keyword: {type: 'text'}}},
-      lang: {name: 'language', inputs: 1, data: {language: {type: "text"}} },
-      regex: {name: 'regex', inputs: 1, data: {regex: {type: "text"}} },
-      leq: {name: 'less than', inputs: 1, data: {number: {type: "number"}} },
-      geq: {name: 'more than', inputs: 1, data: {number: {type: "number"}} },
+      text: { name: 'contains', inputs: 1, data: { keyword: { type: 'text' } } },
+      lang: { name: 'language', inputs: 1, data: { language: { type: "text" } } },
+      regex: { name: 'regex', inputs: 1, data: { regex: { type: "text" } } },
+      leq: { name: 'less than', inputs: 1, data: { number: { type: "number" } } },
+      geq: { name: 'more than', inputs: 1, data: { number: { type: "number" } } },
     },
     colors: {
       rConst: '#1f77b4',
-      rVar:   '#2ca02c',
+      rVar: '#2ca02c',
       pConst: '#ff7f0e',
-      pVar:   '#d62728',
-      pLit:   '#9467bd',
+      pVar: '#d62728',
+      pLit: '#9467bd',
     },
     // Functions:
     addNode: addNode,
@@ -53,7 +53,7 @@ function propertyGraphService (req, log, settings) {
   var lastVarPropId = 0;
 
   /******* Filter TDA ********************************************************/
-  function Filter (variable, type, data) {
+  function Filter(variable, type, data) {
     this.variable = variable;
     this.type = type;
     this.data = data;
@@ -64,17 +64,17 @@ function propertyGraphService (req, log, settings) {
       return 'FILTER (lang(' + this.variable.get() + ') = "' + this.data.language + '")\n';
     }
     if (this.type == 'text') { //Only working with virtuoso currently
-        return this.variable.get() + ' bif:contains "\'' + this.data.keyword + '\'" .\n';
+      return this.variable.get() + ' bif:contains "\'' + this.data.keyword + '\'" .\n';
       //return 'FILTER regex(' + v.get() + ', "' + data.keyword + '", "i")\n'
     }
     if (this.type == 'regex') {
-        return 'FILTER regex(' + this.variable.get() + ', "' + this.data.regex + '", "i")\n'
+      return 'FILTER regex(' + this.variable.get() + ', "' + this.data.regex + '", "i")\n'
     }
     if (this.type == 'leq') {
-        return 'FILTER (' + this.variable.get() + ' <' + this.data.number + ')\n'
+      return 'FILTER (' + this.variable.get() + ' <' + this.data.number + ')\n'
     }
     if (this.type == 'geq') {
-        return 'FILTER (' + this.variable.get() + ' >' + this.data.number + ')\n'
+      return 'FILTER (' + this.variable.get() + ' >' + this.data.number + ')\n'
     }
     if (this.type == 'isuri') {
       return 'FILTER isIRI(' + this.variable.get() + ')\n';
@@ -82,12 +82,12 @@ function propertyGraphService (req, log, settings) {
     if (this.type == 'isliteral') {
       return 'FILTER isLiteral(' + this.variable.get() + ')\n';
     }
-    console.log('filter type "'+ type +'" not implemented.');
+    console.log('filter type "' + type + '" not implemented.');
     return null;
   };
 
   /******* Variable TDA ******************************************************/
-  function Variable (parent) {
+  function Variable(parent) {
     if (parent instanceof Node) {
       this.id = 'var' + lastVarResId++;
     } else if (parent instanceof Property || parent instanceof Literal) {
@@ -97,9 +97,9 @@ function propertyGraphService (req, log, settings) {
     }
     this.alias = '';       // User defined variable name
     this.filters = [];
-    this.options = {show: true, count: false};
+    this.options = { show: true, count: false };
     this.results = [];
-    this.parent  = parent;
+    this.parent = parent;
   }
 
   Variable.prototype.isBinded = function () {
@@ -126,7 +126,7 @@ function propertyGraphService (req, log, settings) {
       usedAlias.splice(i, 1);
     }
     if (alias) {
-      usedAlias.push( alias );
+      usedAlias.push(alias);
       this.alias = alias;
     } else {
       this.alias = '';
@@ -151,8 +151,8 @@ function propertyGraphService (req, log, settings) {
 
   Variable.prototype.addFilter = function (type, data) {
     log.add('New filter (' + type + ') for variable ' + String(this) + ' (' + this.id + ')');
-    this.filters.push( new Filter(this, type, data) );
-    return this.filters[this.filters.length-1];
+    this.filters.push(new Filter(this, type, data));
+    return this.filters[this.filters.length - 1];
   };
 
   Variable.prototype.removeFilter = function (filter) {
@@ -166,7 +166,7 @@ function propertyGraphService (req, log, settings) {
   };
 
   /******* RDFResource TDA ***************************************************/
-  function RDFResource () {
+  function RDFResource() {
     this.isVar = true;
     this.variable = new Variable(this);
     this.uris = [];
@@ -212,10 +212,10 @@ function propertyGraphService (req, log, settings) {
   };
 
   RDFResource.prototype.isVariable = function () {
-    return this.isVar; 
+    return this.isVar;
   };
 
-  RDFResource.prototype.getUri = function () {
+  RDFResource.prototype.getUri = function () {
     if (this.cur >= 0) return this.uris[this.cur];
     return null;
   };
@@ -228,7 +228,7 @@ function propertyGraphService (req, log, settings) {
 
   RDFResource.prototype.prevUri = function () {
     if (this.cur < 0) return null;
-    this.cur = (this.cur == 0) ? (this.uris.length - 1) : (this.cur - 1) ;
+    this.cur = (this.cur == 0) ? (this.uris.length - 1) : (this.cur - 1);
     return this.getUri();
   };
 
@@ -238,7 +238,7 @@ function propertyGraphService (req, log, settings) {
 
   RDFResource.prototype.addUri = function (uri) {
     if (this.uris.indexOf(uri) < 0) {
-      log.add('Adding uri to node id ' + this.id + ' ('+ uri + ')');
+      log.add('Adding uri to node id ' + this.id + ' (' + uri + ')');
       this.uris.push(uri);
       if (this.uris.length == 1) this.cur = 0;
       return true;
@@ -266,8 +266,8 @@ function propertyGraphService (req, log, settings) {
         else return this.getUri().getLabel();
       }
       else {
-        if (this.star) return '('+(this.cur+1)+'/'+this.uris.length+') '+ this.getUri().getLabel() + '*';
-        else return '('+(this.cur+1)+'/'+this.uris.length+') '+ this.getUri().getLabel();
+        if (this.star) return '(' + (this.cur + 1) + '/' + this.uris.length + ') ' + this.getUri().getLabel() + '*';
+        else return '(' + (this.cur + 1) + '/' + this.uris.length + ') ' + this.getUri().getLabel();
       }
     }
     return null;
@@ -283,7 +283,7 @@ function propertyGraphService (req, log, settings) {
       return null;
     }
 
-    if (cfg.limit)  q.limit  = cfg.limit;
+    if (cfg.limit) q.limit = cfg.limit;
     if (cfg.offset) q.offset = cfg.offset;
     return q;
   }
@@ -297,7 +297,7 @@ function propertyGraphService (req, log, settings) {
   }
 
   /******* Node TDA **********************************************************/
-  function Node () {
+  function Node() {
     RDFResource.call(this);
     this.properties = [];
     this.isNode = true;
@@ -320,7 +320,7 @@ function propertyGraphService (req, log, settings) {
 
   Node.prototype.getHeight = function () {
     var h = nodeBaseHeight + this.properties.length * (childHeight + padding);
-    this.properties.filter(p=>{return p.literal}).forEach(p=>{ h+= (childHeight + padding); })
+    this.properties.filter(p => { return p.literal }).forEach(p => { h += (childHeight + padding); })
     return h;
   };
 
@@ -390,7 +390,7 @@ function propertyGraphService (req, log, settings) {
       prop = this.properties[j];
       for (i = propertyGraph.edges.length - 1; i >= 0; i--) {
         edge = propertyGraph.edges[i];
-        if (edge.source === prop) 
+        if (edge.source === prop)
           propertyGraph.edges.splice(i, 1);
       }
     }
@@ -407,25 +407,25 @@ function propertyGraphService (req, log, settings) {
     }
     for (i = 0; i < propertyGraph.nodes.length; i++) {
       node = propertyGraph.nodes[i];
-      if (node === this) 
+      if (node === this)
         propertyGraph.nodes.splice(i, 1);
     }
   };
 
   Node.prototype.loadPreview = function (config) {
     var cfg = config || cfg,
-        q = this.createQuery(cfg);
+      q = this.createQuery(cfg);
     if (q) {
       if (cfg.varFilter) {
         var l = q.addLabel(this);
-        l.variable.addFilter('regex', {regex: cfg.varFilter});
+        l.variable.addFilter('regex', { regex: cfg.varFilter });
       } else {
         q.addOptLabel(this);
       }
       q.triples.forEach(t => {
         if (t[0].isVariable() && t[1].isVariable()) {
           var dc = new RDFResource(),
-              p = new RDFResource();
+            p = new RDFResource();
           dc.mkConst();
           dc.addUri('http://wikiba.se/ontology#directClaim');
           p.variable.alias = t[1].variable.getName() + 'tmp';
@@ -444,13 +444,13 @@ function propertyGraphService (req, log, settings) {
   }
 
   /******* Property TDA ******************************************************/
-  function Property (parentNode) {
+  function Property(parentNode) {
     RDFResource.call(this);
-    this.id         = lastPropId++;
+    this.id = lastPropId++;
     this.isNode = false;
     this.parentNode = parentNode;
-    this.index      = parentNode.properties.length;
-    this.literal    = null;
+    this.index = parentNode.properties.length;
+    this.literal = null;
     parentNode.properties.push(this);
     log.add('New property id ' + this.id + ' for node id ' + parentNode.id);
   }
@@ -458,16 +458,16 @@ function propertyGraphService (req, log, settings) {
   Property.prototype = Object.create(RDFResource.prototype);
   Property.prototype.constructor = Property;
 
-  Object.defineProperty(Property.prototype, 'y', { get: function() { return this.parentNode.y; } }); 
-  Object.defineProperty(Property.prototype, 'x', { get: function() { return this.parentNode.x; } });
+  Object.defineProperty(Property.prototype, 'y', { get: function () { return this.parentNode.y; } });
+  Object.defineProperty(Property.prototype, 'x', { get: function () { return this.parentNode.x; } });
 
-  Property.prototype.getWidth   = function () { return childWidth; };
-  Property.prototype.getHeight  = function () { return childHeight; };
-  Property.prototype.getX       = function () { return -(this.getWidth()/2); };
-  Property.prototype.getY       = function () { return this.getOffsetY(); };
+  Property.prototype.getWidth = function () { return childWidth; };
+  Property.prototype.getHeight = function () { return childHeight; };
+  Property.prototype.getX = function () { return -(this.getWidth() / 2); };
+  Property.prototype.getY = function () { return this.getOffsetY(); };
 
   Property.prototype.getOffsetY = function () { //FIXME: this is executed a lot of times;
-    var h = this.parentNode.getBaseHeight()/2 + this.index * (this.getHeight() + padding);
+    var h = this.parentNode.getBaseHeight() / 2 + this.index * (this.getHeight() + padding);
     for (var i = 0; i < this.index; i++) {
       if (this.parentNode.properties[i].literal) h += (childHeight + padding);
     }
@@ -526,9 +526,9 @@ function propertyGraphService (req, log, settings) {
   Property.prototype.loadPreview = function (config) {
     //For wikidata only
     var cfg = config || {},
-        q = this.createQuery(cfg),
-        dc = new RDFResource(),
-        p = new RDFResource();
+      q = this.createQuery(cfg),
+      dc = new RDFResource(),
+      p = new RDFResource();
     dc.mkConst();
     dc.addUri('http://wikiba.se/ontology#directClaim');
     /*dc.variable.alias = 'wikibaseP';
@@ -537,10 +537,10 @@ function propertyGraphService (req, log, settings) {
     }});*/
     p.variable.alias = this.variable.getName();
     var t1 = [p, dc, this],
-        t2 = q.createTripleLabel(p);
+      t2 = q.createTripleLabel(p);
 
     if (cfg.varFilter) {
-      t2[2].variable.addFilter('regex', {regex: cfg.varFilter});
+      t2[2].variable.addFilter('regex', { regex: cfg.varFilter });
       q.triples.push(t1);
       q.triples.push(t2);
     } else {
@@ -554,7 +554,7 @@ function propertyGraphService (req, log, settings) {
   }
 
   /******* Literal TDA *******************************************************/
-  function Literal (parentProperty) {
+  function Literal(parentProperty) {
     RDFResource.call(this);
     this.parent = parentProperty;
     parentProperty.literal = this;
@@ -581,11 +581,11 @@ function propertyGraphService (req, log, settings) {
   };
 
   Literal.prototype.getPath = function () {
-    var x = 10 - this.parent.getWidth()/2,
-        y = this.parent.getOffsetY() + this.parent.getHeight(),
-        x2 = x + 17,
-        y2 = y + 20;
-    return 'M'+x+','+y+'V'+y2+'H'+x2;
+    var x = 10 - this.parent.getWidth() / 2,
+      y = this.parent.getOffsetY() + this.parent.getHeight(),
+      x2 = x + 17,
+      y2 = y + 20;
+    return 'M' + x + ',' + y + 'V' + y2 + 'H' + x2;
   };
 
   Literal.prototype.delete = function () {
@@ -595,16 +595,16 @@ function propertyGraphService (req, log, settings) {
 
   Literal.prototype.loadPreview = function (config) {
     var cfg = config || {},
-        q = this.createQuery(cfg);
+      q = this.createQuery(cfg);
     if (cfg.varFilter) {
-      var tmpF = this.variable.addFilter('regex', {regex: cfg.varFilter});
+      var tmpF = this.variable.addFilter('regex', { regex: cfg.varFilter });
     }
     q.retrieve(cfg);
     this.variable.removeFilter(tmpF);
   }
 
   /******* Edge TDA **********************************************************/
-  function Edge (source, target) {
+  function Edge(source, target) {
     this.source = source;
     this.target = target;
     propertyGraph.edges.push(this);
@@ -613,23 +613,23 @@ function propertyGraphService (req, log, settings) {
 
   Edge.prototype.contains = function (resource) {
     return (this.source.parentNode == resource ||
-            this.target == resource ||
-            this.source == resource);
+      this.target == resource ||
+      this.source == resource);
   }
 
   /***************************************************************************/
-  function connect (element, graph) {
+  function connect(element, graph) {
     propertyGraph.element = element;
     propertyGraph.visual = graph;
     propertyGraph.element.addEventListener("drop", onDrop);
     propertyGraph.element.addEventListener("dragover", onDragOver);
   }
 
-  function refresh () {
+  function refresh() {
     propertyGraph.visual.updateGraph();
   }
 
-  function reset () {
+  function reset() {
     propertyGraph.selected = null;
     propertyGraph.nodes = [];
     propertyGraph.edges = [];
@@ -643,22 +643,22 @@ function propertyGraphService (req, log, settings) {
     refresh();
   }
 
-  function getSelected () {
+  function getSelected() {
     return propertyGraph.selected;
   }
 
-  function onDragOver (ev) {
+  function onDragOver(ev) {
     ev.preventDefault();
   }
 
-  function onDrop (ev) {
-    var z    = propertyGraph.visual.getZoom();
-    var uri  = ev.dataTransfer.getData("uri");
+  function onDrop(ev) {
+    var z = propertyGraph.visual.getZoom();
+    var uri = ev.dataTransfer.getData("uri");
     var prop = ev.dataTransfer.getData("prop");
     var special = ev.dataTransfer.getData("special");
     if (!uri && !prop && !special) return null;
     if (special == 'example') {
-      createExample( ev.dataTransfer.getData("type"), ev );
+      createExample(ev.dataTransfer.getData("type"), ev);
       return null;
     }
     // Create or get the node unless this a literal property
@@ -671,7 +671,7 @@ function propertyGraphService (req, log, settings) {
           d.mkConst();
         }
       }
-      d.setPosition((ev.layerX - z[0])/z[2], (ev.layerY - z[1])/z[2]);
+      d.setPosition((ev.layerX - z[0]) / z[2], (ev.layerY - z[1]) / z[2]);
     }
 
     // Add the property
@@ -705,52 +705,52 @@ function propertyGraphService (req, log, settings) {
       p.addUri('http://www.w3.org/2000/01/rdf-schema#label');
       p.mkConst();
       p.mkLiteral();
-      p.getLiteral().setAlias(alias+'Label');
-      p.getLiteral().addFilter('lang', {language: 'en'});
-      p.getLiteral().addFilter('text', {keyword: alias});
+      p.getLiteral().setAlias(alias + 'Label');
+      p.getLiteral().addFilter('lang', { language: 'en' });
+      p.getLiteral().addFilter('text', { keyword: alias });
     }
 
     if (d && (!prop) && d != propertyGraph.select) d.onClick();
     refresh();
   }
 
-  function createExample (type, ev) {
+  function createExample(type, ev) {
     var z = propertyGraph.visual.getZoom();
-    var x = (ev.layerX - z[0])/z[2];
-    var y = (ev.layerY - z[1])/z[2];
+    var x = (ev.layerX - z[0]) / z[2];
+    var y = (ev.layerY - z[1]) / z[2];
 
     var s = addNode();
     var p = s.newProp();
     var o = addNode();
     addEdge(p, o);
     s.setPosition(x, y);
-    o.setPosition(x+280, y+25);
+    o.setPosition(x + 280, y + 25);
 
     switch (type) {
       case 'cats':
         s.variable.setAlias('cat');
-        p.addUri("http://www.wikidata.org/prop/direct/P31");  p.mkConst();
-        o.addUri("http://www.wikidata.org/entity/Q146");      o.mkConst();
+        p.addUri("http://www.wikidata.org/prop/direct/P31"); p.mkConst();
+        o.addUri("http://www.wikidata.org/entity/Q146"); o.mkConst();
         break;
 
       case 'w3c':
         s.variable.setAlias('standard');
-        p.addUri("http://www.wikidata.org/prop/direct/P1462");  p.mkConst();
-        o.addUri("http://www.wikidata.org/entity/Q37033");      o.mkConst();
+        p.addUri("http://www.wikidata.org/prop/direct/P1462"); p.mkConst();
+        o.addUri("http://www.wikidata.org/entity/Q37033"); o.mkConst();
         break;
 
       case 'mosquito':
         s.variable.setAlias('mosquito');
-        p.addUri("http://www.wikidata.org/prop/direct/P31");  p.mkConst();
-        o.addUri("http://www.wikidata.org/entity/Q16521");    o.mkConst();
+        p.addUri("http://www.wikidata.org/prop/direct/P31"); p.mkConst();
+        o.addUri("http://www.wikidata.org/entity/Q16521"); o.mkConst();
         var p2 = s.newProp(); p2.addUri("http://www.wikidata.org/prop/direct/P105"); p2.mkConst();
         var o2 = addNode(); o2.addUri("http://www.wikidata.org/entity/Q7432"); o2.mkConst();
         var p3 = s.newProp(); p3.addUri("http://www.wikidata.org/prop/direct/P171"); p3.mkConst(); p3.star = true;
         var o3 = addNode(); o3.addUri("http://www.wikidata.org/entity/Q7367"); o3.mkConst();
         var p4 = s.newProp(); p4.addUri("http://www.wikidata.org/prop/direct/P225"); p4.mkConst(); p4.mkLiteral();
         p4.getLiteral().setAlias('taxon_name');
-        addEdge(p2, o2); o2.setPosition(x+280, y+65);
-        addEdge(p3, o3); o3.setPosition(x+280, y+105);
+        addEdge(p2, o2); o2.setPosition(x + 280, y + 65);
+        addEdge(p3, o3); o3.setPosition(x + 280, y + 105);
         //addEdge(p4, o4); o4.setPosition(x+280, y+145);
         break;
 
@@ -767,7 +767,7 @@ function propertyGraphService (req, log, settings) {
         var p5 = o.newProp(); p5.addUri("http://www.wikidata.org/prop/direct/P682"); p5.mkConst();
         var o3 = addNode(); o3.variable.setAlias('biological_process');
         var p6 = o3.newProp(); p6.addUri("http://www.wikidata.org/prop/direct/P361");
-                               p6.addUri("http://www.wikidata.org/prop/direct/P279"); p6.mkConst(); p6.star = true;
+        p6.addUri("http://www.wikidata.org/prop/direct/P279"); p6.mkConst(); p6.star = true;
         var o4 = addNode(); o4.addUri("http://www.wikidata.org/entity/Q14818032"); o4.mkConst();
 
         addEdge(p2, o);
@@ -775,13 +775,13 @@ function propertyGraphService (req, log, settings) {
         addEdge(p3, o2);
         addEdge(p5, o3);
         addEdge(p6, o4);
-        o.setPosition(x,y);
-        s3.setPosition(x, y-110);
-        o4.setPosition(x, y+80);
-        o2.setPosition(x+280, y-85);
-        s2.setPosition(x+280, y-35);
-        o3.setPosition(x+280, y+45);
-        s.setPosition(x-280, y-25);
+        o.setPosition(x, y);
+        s3.setPosition(x, y - 110);
+        o4.setPosition(x, y + 80);
+        o2.setPosition(x + 280, y - 85);
+        s2.setPosition(x + 280, y - 35);
+        o3.setPosition(x + 280, y + 45);
+        s.setPosition(x - 280, y - 25);
         break;
     }
 
@@ -791,22 +791,22 @@ function propertyGraphService (req, log, settings) {
 
   /***************************************************************************/
   /****** Public stuff ******/
-  function addNode () {
+  function addNode() {
     return new Node();
   }
 
-  function addEdge (source, target) {
+  function addEdge(source, target) {
     /* FIXME: duplicate edges */
     if (source instanceof Property) return new Edge(source, target);
-    if (source instanceof Node)     return new Edge(source.newProp(), target);
+    if (source instanceof Node) return new Edge(source.newProp(), target);
   }
 
-  function getNodeByUri (uri) {
+  function getNodeByUri(uri) {
     return uriToNode[uri] || null;
   }
 
   /***** Query creator stuff *****/
-  function Query (resource) {
+  function Query(resource) {
     this.select = [resource];
     this.update(resource);
     this.optionals = [];
@@ -814,8 +814,8 @@ function propertyGraphService (req, log, settings) {
 
   Query.prototype.update = function (resource) {
     var dep = new Set(),
-        queue = [],
-        triples = [];
+      queue = [],
+      triples = [];
 
     queue.enqueue = function (x) {
       if (x.isVariable() && !dep.has(x)) {
@@ -827,16 +827,16 @@ function propertyGraphService (req, log, settings) {
     };
 
     triples.add = function (s, p, o) {
-      if (this.some(e => { return (e[0] === s && e[1] === p && e[2] === o); })) 
+      if (this.some(e => { return (e[0] === s && e[1] === p && e[2] === o); }))
         return false;
-      this.push([s,p,o]);
-      [s,p,o].forEach( r =>{ queue.enqueue(r); });
+      this.push([s, p, o]);
+      [s, p, o].forEach(r => { queue.enqueue(r); });
     }
 
     triples.addEdge = function (e) {
       this.add(e.source.parentNode, e.source, e.target);
     }
-    
+
     queue.enqueue(resource);
 
     while (queue.length > 0) {
@@ -864,11 +864,11 @@ function propertyGraphService (req, log, settings) {
 
   Query.prototype.get = function () {
     if (this.triples.length == 0) return null;
-    var self =  this,
-        values = new Set(),
-        prefixes = new Set();
+    var self = this,
+      values = new Set(),
+      prefixes = new Set();
 
-    function writeTriple (t) {
+    function writeTriple(t) {
       return t.map(r => {
         if (r.isVariable()) return r.variable;
         else {
@@ -900,13 +900,13 @@ function propertyGraphService (req, log, settings) {
       }).join(' ') + ' .\n';
     }
 
-    self.q = "SELECT DISTINCT " + self.select.filter(r => {return !r.hide}).map(r => {return r.variable}).join(' ') + " WHERE {\n"
+    self.q = "SELECT DISTINCT " + self.select.filter(r => { return !r.hide }).map(r => { return r.variable }).join(' ') + " WHERE {\n"
     self.triples.forEach(t => {
       self.q += '  ' + writeTriple(t);
       // flatten all filters and apply
       [].concat.apply([], t
-          .filter(r => { return r.isVariable(); })
-          .map(r => { return r.variable.filters; })
+        .filter(r => { return r.isVariable(); })
+        .map(r => { return r.variable.filters; })
       ).forEach(f => { self.q += '  ' + f.apply(); });
       if (t[1].isVariable() && t[2].isVariable()) {
         if (t[2] instanceof Literal) {
@@ -924,8 +924,8 @@ function propertyGraphService (req, log, settings) {
         // Same as for triples
         self.q += '    ' + writeTriple(t);
         [].concat.apply([], t
-            .filter(r => { return r.isVariable(); })
-            .map(r => { return r.variable.filters; })
+          .filter(r => { return r.isVariable(); })
+          .map(r => { return r.variable.filters; })
         ).forEach(f => { self.q += '    ' + f.apply(); });
         if (t[1].isVariable() && t[2].isVariable()) {
           if (t[2] instanceof Literal) {
@@ -942,7 +942,7 @@ function propertyGraphService (req, log, settings) {
     Array.from(values).forEach(v => {
       self.q += '  VALUES ' + v.variable + ' {';
       var mapped = v.parent ?
-        v.uris.map(u => { return '"' + u + '"'}) :
+        v.uris.map(u => { return '"' + u + '"' }) :
         v.uris.map(u => {
           var pre = u.toPrefix();
           if (pre[1]) prefixes.add(pre[1]);
@@ -973,14 +973,14 @@ function propertyGraphService (req, log, settings) {
     p.addUri(settings.labelUri);
     var o = new RDFResource();
     o.variable.alias = resource.variable.getName() + 'Label';
-    o.variable.addFilter('lang', {language: settings.lang});
+    o.variable.addFilter('lang', { language: settings.lang });
     return [resource, p, o];
   }
 
   Query.prototype.addLabel = function (resource) {
     var t = this.createTripleLabel(resource);
-    if (this.triples.some(e => { return (e[0] === t[0] && e[1] === t[1] && e[2] === t[2]); })) 
-        return null;
+    if (this.triples.some(e => { return (e[0] === t[0] && e[1] === t[1] && e[2] === t[2]); }))
+      return null;
     this.triples.push(t);
     this.select.push(t[2]);
     return t[2];
@@ -996,7 +996,7 @@ function propertyGraphService (req, log, settings) {
   Query.prototype.addLabels = function () {
     var self = this;
     var labels = [];
-    self.select.forEach(r => { 
+    self.select.forEach(r => {
       if (r instanceof Node || r instanceof Property)
         labels.push(self.addLabel(r));
     });
@@ -1009,28 +1009,30 @@ function propertyGraphService (req, log, settings) {
 
   Query.prototype.retrieve = function (config) {
     var self = this,
-        cfg = config || {},
-        q = self.get(),
-        n = self.select.filter(r => {return (r.variable.isBinded() && r.variable.query != q); }).length;
-    if (q && n > 0) {
-      req.execQuery(q, { canceller: cfg.canceller, callback: data => {
-        if (data.results.bindings.length > 0) {
-          self.select.forEach(r => {
-            var values = new Set(),
+      cfg = config || {},
+      q = self.get(),
+      n = self.select.filter(r => { return (r.variable.isBinded() && r.variable.query != q); }).length;
+    if (q && n > 0) {
+      req.execQuery(q, {
+        canceller: cfg.canceller, callback: data => {
+          if (data.results.bindings.length > 0) {
+            self.select.forEach(r => {
+              var values = new Set(),
                 variable = r.variable,
                 name = variable.getName();
-            variable.results = data.results.bindings.filter(d => { return d[name]}).map(d => { return d[name]; });
-            variable.results = variable.results.filter(d => { return (!values.has(d.value) && values.add(d.value))});
-            variable.query = q;
-          });
-        } else {
-          self.select.forEach(r => {
-            r.variable.results = [];
-            r.variable.query = q;
-          });
+              variable.results = data.results.bindings.filter(d => { return d[name] }).map(d => { return d[name]; });
+              variable.results = variable.results.filter(d => { return (!values.has(d.value) && values.add(d.value)) });
+              variable.query = q;
+            });
+          } else {
+            self.select.forEach(r => {
+              r.variable.results = [];
+              r.variable.query = q;
+            });
+          }
+          if (cfg.callback) cfg.callback();
         }
-        if (cfg.callback) cfg.callback();
-      }});
+      });
     } else {
       if (cfg.callback) cfg.callback();
     }
