@@ -14,6 +14,7 @@ function SparqlCtrl($scope, pGraph) {
 
   function updateQueries() {
     var all = new Set();
+
     pGraph.nodes.forEach(r => {
       if (r.isVariable()) all.add(r);
       r.properties.forEach(p => {
@@ -25,6 +26,7 @@ function SparqlCtrl($scope, pGraph) {
     vm.queries = [];
     vm.empty = [];
     var queue = Array.from(all);
+
     while (queue.length > 0) {
       var cur = queue.pop();
       var q = cur.createQuery();
@@ -39,6 +41,7 @@ function SparqlCtrl($scope, pGraph) {
         vm.empty.push(cur);
       }
     }
+
   }
 
   function onClick(res) {

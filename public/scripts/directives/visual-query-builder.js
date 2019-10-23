@@ -3,6 +3,7 @@ angular.module('rdfvis.directives').directive('visualQueryBuilder', visualQueryB
 visualQueryBuilder.$inject = ['propertyGraphService'];
 
 function visualQueryBuilder(pGraph) {
+  
   var directive = {
     link: link,
     restrict: 'EA',

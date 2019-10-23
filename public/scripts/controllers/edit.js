@@ -38,15 +38,18 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
   vm.filters = pGraph.filters;
 
   function editResource(resource) {
+
     if (vm.selected != resource) {
       vm.resultFilterValue = '';
     }
+
     if (resource) {
       vm.selected = resource;
       vm.variable = resource.variable;
       vm.isVariable = resource.isVariable();
       vm.isConst = !vm.isVariable;
       vm.isLiteral = !!(vm.selected.parent); //FIXME: check if this is a literal
+
       if (vm.isLiteral) {
         vm.newValueType = 'text';
         vm.newValuePlaceholder = 'add a new literal';
@@ -54,8 +57,10 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
         vm.newValueType = 'url';
         vm.newValuePlaceholder = 'add a new URI';
       }
+
       loadPreview();
     }
+
     $scope.$emit('tool', 'edit');
   }
 
@@ -201,6 +206,7 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
           lastValueSearch = now;
           vm.resultFilterLoading = true;
           config.varFilter = now;
+
           queryGraph(pGraph, function (data) {
             if (isEmpty(data))
               vm.selected.loadPreview(config);
@@ -213,12 +219,14 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
       }, 400);
     } else {
       lastValueSearch = '';
+
       queryGraph(pGraph, function (data) {
         if (isEmpty(data))
           vm.selected.loadPreview(config);
         else
           vm.variable.results = data;
       });
+
       // vm.selected.loadPreview(config);
     }
   }

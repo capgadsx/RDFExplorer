@@ -45,9 +45,16 @@ function MainCtrl($scope, pGraph, query, request, $timeout, $http, log, $uibModa
   /* Tools display function */
   function toolToggle(panel) {
     vm.tool = (vm.tool == panel) ? 'none' : panel;
-    if (vm.tool == 'describe' && pGraph.getSelected()) pGraph.getSelected().describe();
-    if (vm.tool == 'edit' && pGraph.getSelected()) pGraph.getSelected().edit();
-    if (vm.tool == 'sparql') pGraph.getQueries();
+
+    if (vm.tool == 'describe' && pGraph.getSelected())
+      pGraph.getSelected().describe();
+
+    if (vm.tool == 'edit' && pGraph.getSelected())
+      pGraph.getSelected().edit();
+
+    if (vm.tool == 'sparql')
+      pGraph.getQueries();
+
   }
 
   function searchToggle() { vm.searchActive = !vm.searchActive; }
@@ -119,15 +126,16 @@ function MainCtrl($scope, pGraph, query, request, $timeout, $http, log, $uibModa
         },
         function onError(response) { onSearchErr(); console.log('Error: ' + response.data); }
       );
-      //request.execQuery(query.search(input), onSearch, onSearchErr);
     }
     vm.searchActive = true;
   }
 
   function searchChange() {
     var now = vm.searchInput + '';
+    
     $timeout(function () {
-      if (now && now == vm.searchInput) search();
+      if (now && now == vm.searchInput)
+        search();
     }, 400);
   }
 
