@@ -677,7 +677,7 @@ function propertyGraphService(req, log, settings) {
     // Add the property
     if (prop) {
       var sel = getSelected();
-      if (!sel || !sel.isNode()) {
+      if (!sel || !sel.isNode) {
         console.log('Selected resource does not support property creation!');
         return null;
       }
