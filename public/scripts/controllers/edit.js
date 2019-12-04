@@ -37,6 +37,8 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
   vm.refresh = pGraph.refresh;
   vm.filters = pGraph.filters;
 
+  vm.lastGraph = '';
+
   function editResource(resource) {
 
     if (vm.selected != resource) {
@@ -66,10 +68,10 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
 
   function mkVariable() {
     vm.selected.mkVariable();
+    vm.selected.uris = [];
     vm.isVariable = true;
     vm.isConst = false;
     loadPreview();
-    vm.refresh();
   }
 
   function mkConst() {
@@ -77,10 +79,11 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
     vm.selected.mkConst();
     vm.isVariable = false;
     vm.isConst = true;
-    vm.refresh();
   }
 
   function addValue(newV) {
+    console.log("add: " + JSON.stringify(toQueryGraph(pGraph)));
+
     if (!newV) {
       newV = vm.newValue;
       vm.newValue = '';
@@ -91,19 +94,21 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
       } else {
         vm.added += 1
       }
-      vm.refresh();
     }
+    loadPreview();
   }
 
   function rmValue(value) {
-    return vm.selected.removeUri(value)
+    console.log("rmv: " + JSON.stringify(toQueryGraph(pGraph)));
+    var removed = vm.selected.removeUri(value);
+    loadPreview();
+    return removed;
   }
 
   function newFilter(targetVar) { //TODO: targetVar not needed now
     if (vm.newFilterType == "") return false;
     targetVar.addFilter(vm.newFilterType, copyObj(vm.newFilterData));
     loadPreview();
-    vm.refresh();
     vm.newFilterType = "";
     vm.newFilterData = {};
   }
@@ -118,56 +123,78 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
 
   function toQueryNode(node) {
     return {
-      "id": node.id,
-      "name": node.variable.id,
-      "uris": node.uris,
-    }
+      id: node.id,
+      name: node.variable.id,
+      uris: node.uris,
+      parent: node.id,
+    };
   }
 
   function toQueryEdge(edge) {
     return {
-      "id": edge.source.id,
-      "name": edge.source.variable.id,
-      "uris": edge.source.uris,
-      "sourceId": edge.source.parentNode.id,
-      "targetId": edge.target.id,
-    }
+      id: edge.source.id,
+      name: edge.source.variable.id,
+      uris: edge.source.uris,
+      sourceId: edge.source.parentNode.id,
+      targetId: edge.target.id,
+    };
   }
 
   function toQuerySelected(selected) {
-    return { "id": selected.id, "isNode": selected.isNode }
+    return { id: selected.id, isNode: selected.isNode };
+  }
+
+  function toQueryGraph(graph) {
+    return {
+      nodes: graph.nodes.map(toQueryNode),
+      edges: graph.edges.map(toQueryEdge),
+      selected: toQuerySelected(graph.selected)
+    };
+  }
+
+  function fromQueryGraph(queryGraph, propertyGraph) {
+    var nodeCount = propertyGraph.nodes.length;
+    var edgeCount = propertyGraph.edges.length;
+    var i;
+    for (i = 0; i < nodeCount; i++) {
+      var node = propertyGraph.nodes[i];
+      if (!queryGraph.nodes[node.id]) continue;
+      node.variable.results = queryGraph.nodes[node.id].values;
+    }
+    for (i = 0; i < edgeCount; i++) {
+      var edge = propertyGraph.edges[i];
+      if (!queryGraph.edges[edge.source.id]) continue;
+      edge.source.variable.results = queryGraph.edges[edge.source.id].values;
+    }
   }
 
   function printGraph(graph) {
-    return JSON.stringify(
-      {
-        "nodes": graph.nodes.map(toQueryNode),
-        "edges": graph.edges.map(toQueryEdge),
-        "selected": toQuerySelected(graph.selected)
-      })
+    return JSON.stringify(graph);
   }
 
   function queryGraph(graph, callback) {
-    var jsonGraph = printGraph(graph)
     $http({
       method: 'POST',
       url: 'http://localhost:59286/api/QueryGraph',
       dataType: 'application/json',
       contentType: "application/json",
-      data: jsonGraph,
+      data: graph,
       headers: {
         "Content-Type": "application/json"
       },
     }).then(
       function onSuccess(response) {
         callback(response.data);
-        // console.log("success:" + JSON.stringify(response.data))
-        // return response;
       },
       function onError(response) {
         console.log('Error: ' + response.data);
       }
     );
+  }
+
+  function areEqual(graph1, graph2) {
+    return JSON.stringify(graph1.nodes) == JSON.stringify(graph2.nodes)
+      && JSON.stringify(graph1.edges) == JSON.stringify(graph2.edges);
   }
 
   function isEmpty(myObject) {
@@ -179,9 +206,16 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
 
     return true;
   }
-
+  // Aqui es donde tengo que trabajar:
   function loadPreview() {
-    if (!vm.isVariable) return;
+    vm.refresh();
+    var newGraph = toQueryGraph(pGraph);
+
+    if (areEqual(vm.lastGraph, newGraph)) {
+      return;
+    }
+
+    vm.lastGraph = clone(newGraph);
 
     if (vm.canceller) {
       vm.canceller.resolve('new preview');
@@ -199,36 +233,13 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
       canceller: vm.canceller.promise,
     };
 
-    var now = vm.resultFilterValue + '';
-    if (now) {
-      $timeout(function () {
-        if (now == vm.resultFilterValue && now != lastValueSearch) {
-          lastValueSearch = now;
-          vm.resultFilterLoading = true;
-          config.varFilter = now;
+    console.log("Query: " + JSON.stringify(newGraph));
 
-          queryGraph(pGraph, function (data) {
-            if (isEmpty(data))
-              vm.selected.loadPreview(config);
-            else
-              vm.variable.results = data;
-          });
-
-          // vm.selected.loadPreview(config);
-        }
-      }, 400);
-    } else {
-      lastValueSearch = '';
-
-      queryGraph(pGraph, function (data) {
-        if (isEmpty(data))
-          vm.selected.loadPreview(config);
-        else
-          vm.variable.results = data;
-      });
-
-      // vm.selected.loadPreview(config);
-    }
+    queryGraph(printGraph(newGraph), function (data) {
+      fromQueryGraph(data, pGraph);
+      vm.resultFilterLoading = false;
+      vm.canceller = null;
+    });
   }
 
   function addSearchAsFilter() { // should work but not used
@@ -243,6 +254,10 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
     p.mkLiteral();
     p.getLiteral.addFilter('regex', { regex: text });
     loadPreview();
+  }
+
+  function clone(obj) {
+    return JSON.parse(JSON.stringify(obj));
   }
 
   function copyObj(obj) {
