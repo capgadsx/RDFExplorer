@@ -82,8 +82,6 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
   }
 
   function addValue(newV) {
-    console.log("add: " + JSON.stringify(toQueryGraph(pGraph)));
-
     if (!newV) {
       newV = vm.newValue;
       vm.newValue = '';
@@ -99,8 +97,8 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
   }
 
   function rmValue(value) {
-    console.log("rmv: " + JSON.stringify(toQueryGraph(pGraph)));
     var removed = vm.selected.removeUri(value);
+    mkVariable();
     loadPreview();
     return removed;
   }
