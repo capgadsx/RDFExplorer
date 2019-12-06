@@ -4,7 +4,7 @@ const morgan      = require('morgan');
 const bodyParser  = require('body-parser');
 const fs          = require('fs');
 
-const port      = 8080;
+const port      = 4200;
 const views     = __dirname + '/public/views/';
 
 var app = express();
