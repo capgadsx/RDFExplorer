@@ -732,6 +732,14 @@ function visualQueryBuilder(pGraph) {
       }
     };
 
+    var meUpdateGraph = {
+      name: 'Update Graph',
+      disabled: () => { return false },
+      func: () => {
+        graph.updateGraph();
+      }
+    };
+
     var meNewProp = {
       name: 'New property',
       disabled: () => { return !pGraph.getSelected(); },
@@ -799,7 +807,7 @@ function visualQueryBuilder(pGraph) {
       pMenu = new ContextMenu(), // Propery menu
       lMenu = new ContextMenu(); // Litral menu
 
-    gMenu.items(meNewVar, meNewProp);
+    gMenu.items(meNewVar, meNewProp, meUpdateGraph);
     rMenu.items(meDescribe, meEdit, meNewPropMove, meNewLit, meCopyUri, meRemove);
     pMenu.items(meDescribe, meEdit, meCopyUri, meRemove);
     lMenu.items(meEdit, meRemove);
