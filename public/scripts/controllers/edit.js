@@ -1,8 +1,8 @@
 angular.module('rdfvis.controllers').controller('EditCtrl', EditCtrl);
 
-EditCtrl.$inject = ['$scope', 'propertyGraphService', '$timeout', '$q', '$http'];
+EditCtrl.$inject = ['$scope', 'propertyGraphService', '$timeout', '$q', '$http', 'requestService'];
 
-function EditCtrl($scope, pGraph, $timeout, $q, $http) {
+function EditCtrl($scope, pGraph, $timeout, $q, $http, request) {
   var vm = this;
   vm.selected = null;
   vm.variable = null;
@@ -72,6 +72,7 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
     vm.isVariable = true;
     vm.isConst = false;
     loadPreview();
+    vm.refresh();
   }
 
   function mkConst() {
@@ -79,6 +80,7 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
     vm.selected.mkConst();
     vm.isVariable = false;
     vm.isConst = true;
+    vm.refresh();
   }
 
   function addValue(newV) {
@@ -92,6 +94,7 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
       } else {
         vm.added += 1
       }
+      vm.refresh();
     }
     loadPreview();
   }
@@ -107,6 +110,7 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
     if (vm.newFilterType == "") return false;
     targetVar.addFilter(vm.newFilterType, copyObj(vm.newFilterData));
     loadPreview();
+    vm.refresh();
     vm.newFilterType = "";
     vm.newFilterData = {};
   }
@@ -158,11 +162,19 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
       var node = propertyGraph.nodes[i];
       if (!queryGraph.nodes[node.id]) continue;
       node.variable.results = queryGraph.nodes[node.id].values;
+      setLabels(node.variable.results);
     }
     for (i = 0; i < edgeCount; i++) {
       var edge = propertyGraph.edges[i];
       if (!queryGraph.edges[edge.source.id]) continue;
       edge.source.variable.results = queryGraph.edges[edge.source.id].values;
+      setLabels(edge.source.variable.results);
+    }
+  }
+
+  function setLabels(results){
+    for (var result in results){
+      request.setLabel(results[result].value, results[result].text);
     }
   }
 
@@ -237,6 +249,7 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http) {
       fromQueryGraph(data, pGraph);
       vm.resultFilterLoading = false;
       vm.canceller = null;
+      vm.refresh();
     });
   }
 
