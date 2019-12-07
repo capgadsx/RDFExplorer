@@ -1,10 +1,10 @@
 div(ng-show="main.tool == 'describe'", ng-controller="DescribeCtrl as ctrl")
   // Show the state of the selected element
-  .ta-center(ng-if="ctrl.selected.source")
+  .ta-center(ng-if="ctrl.selected.uri")
     //TODO: add disable on chevron when no next or prev.
-    i.pull-left.fa.fa-chevron-left.mt-1(ng-click="ctrl.getPrev()")
+    //- i.pull-left.fa.fa-chevron-left.mt-1(ng-click="ctrl.getPrev()")
     a.ell(href="{{ctrl.selected.uri}}", target="_blank", style="width: calc(100% - 40px);") {{ ctrl.selected.uri }}
-    i.pull-right.fa.fa-chevron-right.mt-1(ng-click="ctrl.getNext()")
+    //- i.pull-right.fa.fa-chevron-right.mt-1(ng-click="ctrl.getNext()")
     hr(style="margin: 3px 0px;")
 
   // Show when no URI selected
