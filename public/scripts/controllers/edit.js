@@ -127,7 +127,7 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http, request) {
     return {
       id: node.id,
       name: node.variable.id,
-      uris: node.uris,
+      uri: node.uris[0],
       parent: node.id,
     };
   }
@@ -136,7 +136,7 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http, request) {
     return {
       id: edge.source.id,
       name: edge.source.variable.id,
-      uris: edge.source.uris,
+      uri: edge.source.uris[0],
       sourceId: edge.source.parentNode.id,
       targetId: edge.target.id,
     };
@@ -185,7 +185,7 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http, request) {
   function queryGraph(graph, callback) {
     $http({
       method: 'POST',
-      url: 'http://localhost:59286/api/QueryGraph',
+      url: 'http://127.0.0.1:8080/api/QueryGraph',
       dataType: 'application/json',
       contentType: "application/json",
       data: graph,
