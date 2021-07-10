@@ -185,7 +185,7 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http, request) {
   function queryGraph(graph, callback) {
     $http({
       method: 'POST',
-      url: process.env.GRAPH_API_URL,
+      url: GRAPH_API_URL_PLACEHOLDER,
       dataType: 'application/json',
       contentType: "application/json",
       data: graph,
