@@ -127,7 +127,7 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http, request) {
     return {
       id: node.id,
       name: node.variable.id,
-      uri: typeof(node.uris[0]) === undefined ? null : node.uris[0],
+      uris: node.uris,
       parent: node.id,
     };
   }
@@ -136,7 +136,7 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http, request) {
     return {
       id: edge.source.id,
       name: edge.source.variable.id,
-      uri: typeof(edge.source.uris[0]) === undefined ? null : edge.source.uris[0],
+      uris: edge.source.uris,
       source: edge.source.parentNode.id,
       target: edge.target.id,
     };
