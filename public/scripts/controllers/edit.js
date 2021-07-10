@@ -127,7 +127,7 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http, request) {
     return {
       id: node.id,
       name: node.variable.id,
-      uris: node.uris,
+      uri: node.uris,
       parent: node.id,
     };
   }
@@ -136,7 +136,7 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http, request) {
     return {
       id: edge.source.id,
       name: edge.source.variable.id,
-      uris: edge.source.uris,
+      uri: edge.source.uris,
       source: edge.source.parentNode.id,
       target: edge.target.id,
     };
