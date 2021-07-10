@@ -127,7 +127,7 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http, request) {
     return {
       id: node.id,
       name: node.variable.id,
-      uri: node.uris[0],
+      uri: typeof(node.uris[0]) === undefined ? null : node.uris[0],
       parent: node.id,
     };
   }
@@ -136,9 +136,9 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http, request) {
     return {
       id: edge.source.id,
       name: edge.source.variable.id,
-      uri: edge.source.uris[0],
-      sourceId: edge.source.parentNode.id,
-      targetId: edge.target.id,
+      uri: typeof(edge.source.uris[0]) === undefined ? null : edge.source.uris[0],
+      source: edge.source.parentNode.id,
+      target: edge.target.id,
     };
   }
 
@@ -149,8 +149,7 @@ function EditCtrl($scope, pGraph, $timeout, $q, $http, request) {
   function toQueryGraph(graph) {
     return {
       nodes: graph.nodes.map(toQueryNode),
-      edges: graph.edges.map(toQueryEdge),
-      selected: toQuerySelected(graph.selected)
+      edges: graph.edges.map(toQueryEdge)
     };
   }
 
